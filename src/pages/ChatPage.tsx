@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { getChatCompletion } from "../api/openrouter";
 import type { SimpleChatMessage } from "../types";
+import TypingIndicator from "../components/TypingIndicator";
 
 type SimpleChatMessageWithId = SimpleChatMessage & { id: number };
 
@@ -57,6 +58,7 @@ export default function ChatPage() {
             {msg.content as string}
           </div>
         ))}
+        {loading && <div><TypingIndicator /></div>}
       </main>
 
       {/* Input Bar */}

@@ -17,7 +17,7 @@ const openai = new OpenAI({
 export async function getChatCompletion(messages: SimpleChatMessage[]) {
     try {
         const response = await openai.chat.completions.create({
-            model: "deepseek/deepseek-chat-v3.1:free", // You can use any model from openrouter.ai
+            model: "openai/gpt-oss-20b:free", // You can use any model from openrouter.ai
             messages: messages,
         });
 
