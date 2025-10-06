@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getChatCompletion } from "../api/openrouter";
 import type { SimpleChatMessage } from "../types";
 import TypingIndicator from "../components/TypingIndicator";
@@ -12,6 +12,17 @@ export default function ChatPage() {
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const chatEndRef = useRef<HTMLDivElement | null>(null); // 👈 referência para o final do chat
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Scrolls to bottom whenever messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   async function handleSend() {
     // Prevent sending empty messages
@@ -59,6 +70,9 @@ export default function ChatPage() {
           </div>
         ))}
         {loading && <div><TypingIndicator /></div>}
+        
+        {/* Elemento fantasma para rolagem */}
+        <div ref={chatEndRef}></div>
       </main>
 
       {/* Input Bar */}
