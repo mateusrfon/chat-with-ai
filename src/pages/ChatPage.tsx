@@ -90,8 +90,12 @@ export default function ChatPage() {
             {msg.content as string}
           </div>
         ))}
-        {loading && <div><TypingIndicator /></div>}
-        
+        {loading && (
+          <div>
+            <TypingIndicator />
+          </div>
+        )}
+
         {/* Elemento fantasma para rolagem */}
         <div ref={chatEndRef}></div>
       </main>
