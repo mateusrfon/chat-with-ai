@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { getChatCompletion } from "../api/openrouter";
 import type { SimpleChatMessage } from "../types";
 import TypingIndicator from "../components/TypingIndicator";
+import { getTextToSpeech } from "../api/tts";
+import { postChatMessage } from "../api/chat";
 
 type SimpleChatMessageWithId = SimpleChatMessage & { id: number };
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<SimpleChatMessageWithId[]>([
-    { id: 0, role: "assistant", content: "Hello! How can I help you?" }
+    { id: 0, role: "assistant", content: "Hello! How can I help you?" },
   ]);
 
   const [input, setInput] = useState("");
@@ -28,23 +29,43 @@ export default function ChatPage() {
     // Prevent sending empty messages
     if (!input.trim()) return;
 
-    const newMessages: SimpleChatMessageWithId[] = [...messages, { id: Date.now(), role: "user", content: input }];
+    const newMessages: SimpleChatMessageWithId[] = [
+      ...messages,
+      { id: Date.now(), role: "user", content: input },
+    ];
     setMessages(newMessages);
     setInput("");
     setLoading(true);
 
     try {
-      const response = await getChatCompletion(newMessages.map((msg) => {
-        const { id, ...rest } = msg;
-        return { ...rest };
-      }));
-      setMessages([...newMessages, { id: Date.now(), role: "assistant", content: response }]);
-    } catch (error) {
-      setMessages([...newMessages, { id: Date.now(), role: "assistant", content: "Error: Unable to chat with AI." }]);
+      const response = await postChatMessage(
+        newMessages.map((msg) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { id, ...rest } = msg;
+          return { ...rest };
+        })
+      );
+      setMessages([
+        ...newMessages,
+        { id: Date.now(), role: "assistant", content: response },
+      ]);
+      // For better responsiveness get TTS response with response
+      // Pass flag to backend to skip TTS generation if not needed
+      const audio = await getTextToSpeech(response);
+      await audio.play();
+    } catch {
+      setMessages([
+        ...newMessages,
+        {
+          id: Date.now(),
+          role: "assistant",
+          content: "Error: Unable to chat with AI.",
+        },
+      ]);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
